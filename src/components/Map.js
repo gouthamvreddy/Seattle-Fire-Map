@@ -5,7 +5,7 @@ export default class GMap extends React.Component {
 
   constructor(props){
     super(props);
-    this.state = {zoom: 10};
+    this.state = {zoom: 10, dataArr: []};
   }
 
   static propTypes() {
@@ -23,11 +23,13 @@ export default class GMap extends React.Component {
     );
   }
 
+
   componentDidMount() {
     // create the map, marker and infoWindow after the component has
     // been rendered because we need to manipulate the DOM for Google =(
     this.map = this.createMap()
     this.marker = this.createMarker()
+
     this.infoWindow = this.createInfoWindow()
 
     $.ajax({
@@ -35,17 +37,31 @@ export default class GMap extends React.Component {
       url: "https://data.seattle.gov/resource/grwu-wqtk.json?$limit=10",
       cache: false
     }).then((res) => {
-      console.log(res);
+      this.state.dataArr = res
+      res.forEach((data)=>{
+        new google.maps.Marker({
+          position: new google.maps.LatLng(data.latitude, data.longitude),
+          map: this.map
+        });
+      });
     });
+
     // have to define google maps event listeners here too
     // because we can't add listeners on the map until its created
-    google.maps.event.addListener(this.map, 'zoom_changed', ()=> this.handleZoomChange())
+    google.maps.event.addListener(this.map, 'zoom_changed', ()=> {
+      this.handleZoomChange()
+      // this.createMoreMarkers(this.map)
+
+    });
+
+
   }
 
   // clean up event listeners when component unmounts
   componentDidUnMount() {
     google.maps.event.clearListeners(map, 'zoom_changed')
   }
+
 
   createMap() {
     let mapOptions = {
@@ -68,6 +84,7 @@ export default class GMap extends React.Component {
       map: this.map
     })
 	}
+
 
   createInfoWindow() {
     let contentString = "<div class='InfoWindow'>I'm a Window that contains Info Yay</div>"
