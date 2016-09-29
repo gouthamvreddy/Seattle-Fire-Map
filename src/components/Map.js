@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import styles from './Map.css';
-
 export default class GMap extends React.Component {
 
   constructor(props){
     super(props);
-    this.state = {zoom: 10};
+    let d = new Date();
+    this.state = {zoom: 10, time: `${d.getHours()}:${d.getMinutes()}:${d.getMilliseconds()}`};
   }
 
   static propTypes() {
@@ -17,6 +17,7 @@ export default class GMap extends React.Component {
       <div className={styles.GMap}>
         <div className={styles.UpdatedText}>
           <p>Current Zoom: { this.state.zoom }</p>
+          <p>Current Time: { this.state.time }</p>
         </div>
         <div className={styles.GMapCanvas} ref="mapCanvas"></div>
       </div>
@@ -35,7 +36,9 @@ export default class GMap extends React.Component {
       url: "https://data.seattle.gov/resource/grwu-wqtk.json?$limit=10",
       cache: false
     }).then((res) => {
-      console.log(res);
+      res.forEach((dataObj)=>{
+        this.createMorMarkers(this.getCoordinates(dataObj), this.map);
+      });
     });
     // have to define google maps event listeners here too
     // because we can't add listeners on the map until its created
@@ -68,6 +71,20 @@ export default class GMap extends React.Component {
       map: this.map
     })
 	}
+
+  getCoordinates (data) {
+    return new google.maps.LatLng(
+      data.latitude,
+      data.longitude
+    )
+  }
+
+  createMorMarkers(latLng, map) {
+    return new google.maps.Marker({
+      position: latLng,
+      map: map
+    })
+  }
 
   createInfoWindow() {
     let contentString = "<div class='InfoWindow'>I'm a Window that contains Info Yay</div>"
