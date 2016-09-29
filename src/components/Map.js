@@ -4,7 +4,8 @@ export default class GMap extends React.Component {
 
   constructor(props){
     super(props);
-    this.state = {zoom: 10};
+    let d = new Date();
+    this.state = {zoom: 10, time: `${d.getHours()}:${d.getMinutes()}:${d.getMilliseconds()}`};
   }
 
   static propTypes() {
@@ -16,6 +17,7 @@ export default class GMap extends React.Component {
       <div className={styles.GMap}>
         <div className={styles.UpdatedText}>
           <p>Current Zoom: { this.state.zoom }</p>
+          <p>Current Time: { this.state.time }</p>
         </div>
         <div className={styles.GMapCanvas} ref="mapCanvas"></div>
       </div>
@@ -76,7 +78,7 @@ export default class GMap extends React.Component {
       data.longitude
     )
   }
-  
+
   createMorMarkers(latLng, map) {
     return new google.maps.Marker({
       position: latLng,
